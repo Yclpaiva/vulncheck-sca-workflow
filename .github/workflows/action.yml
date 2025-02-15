@@ -1,0 +1,21 @@
+name: Enviar requirements.txt e parâmetros para API Django
+
+on:
+  push:
+    branches:
+      - main  # Esse workflow é acionado a cada push na branch 'main'
+
+jobs:
+  send_requirements:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checar código do repositório
+        uses: actions/checkout@v2
+
+      - name: Enviar requirements.txt e parâmetros para a API Django
+        run: |
+          curl -X POST "http:///173.249.34.72/api/scans/" \
+          -H "Content-Type: multipart/form-data" \
+          -F "file=@requirements.txt" \
+           -F "technology=python"
