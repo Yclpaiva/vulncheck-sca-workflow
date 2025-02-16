@@ -18,7 +18,7 @@ jobs:
 
       - name: Enviar requirements.txt e parâmetros para a API Django
         run: |
-          curl -X POST "http:///173.249.34.72/api/scans/" \
+          curl -X POST "http:///127.0.0.1/api/scans/" \
           -H "Content-Type: multipart/form-data" \
           -F "file=@requirements.txt" \
           -F "technology=python" -o test.json
@@ -31,14 +31,14 @@ jobs:
           else
             echo "Vulnerabilidades encontradas."
             vulnerabilities=$(cat test.json | jq -r '.vulnerabilities')
-          
+
             echo "## Vulnerability Report" > vulnerabilities_report.md
             echo "| CVE | Severity | Package | Description | CVSS Score | Remediation |" >> vulnerabilities_report.md
             echo "| --- | -------- | ------- | ----------- | ---------- | ----------- |" >> vulnerabilities_report.md
             
-            # Sort vulnerabilities by severity and generate table rows with colors
+            # Sort vulnerabilities by severity and generate table rows
             echo "$vulnerabilities" | jq -r 'sort_by(.cvss_nvd_score) | .[] | 
-              "| \(.cve) | <span style=\"color:\(.severity | if . == \"CRITICAL\" then \"red\" else if . == \"HIGH\" then \"orange\" else \"green\" end)> \(.severity) </span> | \(.package_name) | \(.description) | \(.cvss_nvd_score) | [Remediation Link](\(.remediation)) |"' >> vulnerabilities_report.md
+              "| \(.cve) | \(.severity) | \(.package_name) | \(.description) | \(.cvss_nvd_score) | [Remediation Link](\(.remediation)) |"' >> vulnerabilities_report.md
 
             cat vulnerabilities_report.md
 
