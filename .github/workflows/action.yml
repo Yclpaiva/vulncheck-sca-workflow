@@ -24,31 +24,34 @@ jobs:
           -F "technology=python" -o test.json
 
       # Passo 4: Verificar se "No vulnerabilities found" está no arquivo
-      - name: Check if vulnerabilities found and generate report
+      - name: Check if vulnerabilities found
         run: |
           if grep -q '"message": "No vulnerabilities found"' test.json; then
             echo "Nenhuma vulnerabilidade encontrada."
-            exit 0
+            exit 0  # Marca como falha se houver vulnerabilidades
+
           else
             echo "Vulnerabilidades encontradas."
             vulnerabilities=$(cat test.json | jq -r '.vulnerabilities')
-
+          
             echo "## Vulnerability Report" > vulnerabilities_report.md
             echo "| CVE | Severity | Package | Description | CVSS Score | Remediation |" >> vulnerabilities_report.md
             echo "| --- | -------- | ------- | ----------- | ---------- | ----------- |" >> vulnerabilities_report.md
             
-            # Sort vulnerabilities by severity and generate table rows
+            # Sort vulnerabilities by severity and generate table rows with colors
             echo "$vulnerabilities" | jq -r 'sort_by(.cvss_nvd_score) | .[] | 
-              "| \(.cve) | \(.severity) | \(.package_name) | \(.description) | \(.cvss_nvd_score) | [Remediation Link](\(.remediation)) |"' >> vulnerabilities_report.md
+              "| \(.cve) | <span style=\"color:\(.severity | if . == \"CRITICAL\" then \"red\" else if . == \"HIGH\" then \"orange\" else \"green\" end)> \(.severity) </span> | \(.package_name) | \(.description) | \(.cvss_nvd_score) | [Remediation Link](\(.remediation)) |"' >> vulnerabilities_report.md
 
             cat vulnerabilities_report.md
+          fi
 
-      # Upload the vulnerabilities report as artifact in a separate step
+      # Upload the vulnerabilities report as an artifact for later review
       - name: Upload vulnerability report as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: vulnerability-report
           path: vulnerabilities_report.md
+
 
       - name: Finalizar com erro
         run: |
