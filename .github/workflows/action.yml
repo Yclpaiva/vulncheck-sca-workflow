@@ -18,7 +18,7 @@ jobs:
 
       - name: Enviar requirements.txt e parâmetros para a API Django
         run: |
-          curl -X POST "http://173.249.34.72/api/scans/" \
+          curl -X POST "http:///173.249.34.72/api/scans/" \
           -H "Content-Type: multipart/form-data" \
           -F "file=@requirements.txt" \
           -F "technology=python" -o test.json
@@ -44,10 +44,9 @@ jobs:
             exit 1  # Marca como falha se houver vulnerabilidades
           fi
 
-      # Upload the vulnerabilities report as an artifact for later review
+      # Upload the vulnerabilities report as an artifact using v4
       - name: Upload vulnerability report as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: vulnerability-report
           path: vulnerabilities_report.md
-
