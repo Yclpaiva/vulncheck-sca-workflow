@@ -18,4 +18,21 @@ jobs:
           curl -X POST "http:///173.249.34.72/api/scans/" \
           -H "Content-Type: multipart/form-data" \
           -F "file=@requirements.txt" \
-           -F "technology=python"
+          -F "technology=python"
+
+          # Exibe a resposta para debug
+          echo "API Response: $response"
+
+          # Verifica se há vulnerabilidades com severidade "CRITICAL", "HIGH", "MEDIUM", ou "LOW"
+          critical_count=$(echo "$response" | jq '.vulnerabilities | map(select(.severity == "CRITICAL")) | length')
+          high_count=$(echo "$response" | jq '.vulnerabilities | map(select(.severity == "HIGH")) | length')
+          medium_count=$(echo "$response" | jq '.vulnerabilities | map(select(.severity == "MEDIUM")) | length')
+          low_count=$(echo "$response" | jq '.vulnerabilities | map(select(.severity == "LOW")) | length')
+
+          # Se houver vulnerabilidades de qualquer severidade, falha o job
+          if [ "$critical_count" -gt 0 ] || [ "$high_count" -gt 0 ] || [ "$medium_count" -gt 0 ] || [ "$low_count" -gt 0 ]; then
+            echo "Vulnerabilities found! Critical: $critical_count, High: $high_count, Medium: $medium_count, Low: $low_count"
+            exit 1
+          else
+            echo "No vulnerabilities found"
+          fi
