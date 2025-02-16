@@ -31,19 +31,17 @@ jobs:
             echo "Nenhuma vulnerabilidade encontrada."
           else
             echo "Vulnerabilidades encontradas."
-            cat test.json
+            vulnerabilities=$(cat test.json | jq -r '.vulnerabilities')
+          
+            echo "## Vulnerability Report" > vulnerabilities_report.md
+            echo "| CVE | Severity | Package | Description | CVSS Score | Remediation |" >> vulnerabilities_report.md
+            echo "| --- | -------- | ------- | ----------- | ---------- | ----------- |" >> vulnerabilities_report.md
+            
+            # Sort vulnerabilities by severity and generate table rows
+            echo "$vulnerabilities" | jq -r 'sort_by(.severity) | .[] | "| \(.cve) | \(.severity) | \(.package_name) | \(.description) | \(.cvss_nvd_score) | [Remediation Link](\(.remediation)) |"' >> vulnerabilities_report.md
+            
+            cat vulnerabilities_report.md
             exit 1  # Marca como falha se houver vulnerabilidades
           fi
 
-      - name: Display vulnerabilities in table
-        run: |
-          vulnerabilities=$(cat test.json | jq -r '.vulnerabilities')
-          
-          echo "## Vulnerability Report" > vulnerabilities_report.md
-          echo "| CVE | Severity | Package | Description | CVSS Score | Remediation |" >> vulnerabilities_report.md
-          echo "| --- | -------- | ------- | ----------- | ---------- | ----------- |" >> vulnerabilities_report.md
-          
-          # Sort vulnerabilities by severity and generate table rows
-          echo "$vulnerabilities" | jq -r 'sort_by(.severity) | .[] | "| \(.cve) | \(.severity) | \(.package_name) | \(.description) | \(.cvss_nvd_score) | [Remediation Link](\(.remediation)) |"' >> vulnerabilities_report.md
-          
-          cat vulnerabilities_report.md
+      
