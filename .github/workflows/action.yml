@@ -47,7 +47,7 @@ jobs:
 
       # Upload the vulnerabilities report as an artifact for later review
       - name: Upload vulnerability report as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: vulnerability-report
           path: vulnerabilities_report.md
