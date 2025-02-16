@@ -38,8 +38,8 @@ jobs:
             echo "| --- | -------- | ------- | ----------- | ---------- | ----------- |" >> vulnerabilities_report.md
             
             # Sort vulnerabilities by severity and generate table rows with colors
-            echo "$vulnerabilities" | jq -r 'sort_by(.cvss_nvd_score) | .[] | 
-              "| \(.cve) | \(.severity) | \(.package_name) | \(.description) | \(.cvss_nvd_score) | [Remediation Link](\(.remediation)) |"' >> vulnerabilities_report.md
+            echo "$vulnerabilities" | jq -r 'sort_by(.cvss_nvd_score) | reverse | .[] | 
+            "| \(.cve) | \(.severity) | \(.package_name) | \(.description) | \(.cvss_nvd_score) | [Remediation Link](\(.remediation)) |"' >> vulnerabilities_report.md
 
             cat vulnerabilities_report.md
           fi
