@@ -18,13 +18,13 @@ jobs:
 
       - name: Enviar requirements.txt e parâmetros para a API Django
         run: |
-          curl -X POST "http:///173.249.34.72/api/scans/" \
+          curl -X POST "http:///127.0.0.1/api/scans/" \
           -H "Content-Type: multipart/form-data" \
           -F "file=@requirements.txt" \
           -F "technology=python" -o test.json
 
       # Passo 4: Verificar se "No vulnerabilities found" está no arquivo
-      - name: Check if vulnerabilities found
+      - name: Check if vulnerabilities found and upload report
         run: |
           if grep -q '"message": "No vulnerabilities found"' test.json; then
             echo "Nenhuma vulnerabilidade encontrada."
@@ -41,12 +41,11 @@ jobs:
               "| \(.cve) | <span style=\"color:\(.severity | if . == \"CRITICAL\" then \"red\" else if . == \"HIGH\" then \"orange\" else \"green\" end)> \(.severity) </span> | \(.package_name) | \(.description) | \(.cvss_nvd_score) | [Remediation Link](\(.remediation)) |"' >> vulnerabilities_report.md
 
             cat vulnerabilities_report.md
+
+            # Upload the vulnerabilities report as artifact in the same step
+            uses: actions/upload-artifact@v4
+            with:
+              name: vulnerability-report
+              path: vulnerabilities_report.md
             exit 1  # Marca como falha se houver vulnerabilidades
           fi
-
-      # Upload the vulnerabilities report as an artifact using v4
-      - name: Upload vulnerability report as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: vulnerability-report
-          path: vulnerabilities_report.md
