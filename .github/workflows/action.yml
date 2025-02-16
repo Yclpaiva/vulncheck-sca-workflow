@@ -29,7 +29,6 @@ jobs:
           if grep -q '"message": "No vulnerabilities found"' test.json; then
             echo "Nenhuma vulnerabilidade encontrada."
             exit 0  # Marca como falha se houver vulnerabilidades
-
           else
             echo "Vulnerabilidades encontradas."
             vulnerabilities=$(cat test.json | jq -r '.vulnerabilities')
@@ -40,7 +39,7 @@ jobs:
             
             # Sort vulnerabilities by severity and generate table rows with colors
             echo "$vulnerabilities" | jq -r 'sort_by(.cvss_nvd_score) | .[] | 
-              "| \(.cve) | <span style=\"color:\(.severity | if . == \"CRITICAL\" then \"red\" else if . == \"HIGH\" then \"orange\" else \"green\" end)> \(.severity) </span> | \(.package_name) | \(.description) | \(.cvss_nvd_score) | [Remediation Link](\(.remediation)) |"' >> vulnerabilities_report.md
+              "| \(.cve) | \(.severity) | \(.package_name) | \(.description) | \(.cvss_nvd_score) | [Remediation Link](\(.remediation)) |"' >> vulnerabilities_report.md
 
             cat vulnerabilities_report.md
           fi
@@ -51,7 +50,6 @@ jobs:
         with:
           name: vulnerability-report
           path: vulnerabilities_report.md
-
 
       - name: Finalizar com erro
         run: |
